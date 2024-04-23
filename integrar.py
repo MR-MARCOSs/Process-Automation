@@ -8,7 +8,7 @@ from selenium.webdriver.firefox.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from PyQt6.QtWidgets import QApplication, QMainWindow, QLineEdit, QPushButton, QMessageBox, QCheckBox, QVBoxLayout, QWidget, QLabel
+from PyQt6.QtWidgets import QApplication, QMainWindow, QLineEdit, QPushButton, QMessageBox, QCheckBox, QVBoxLayout, QWidget, QLabel, QFileDialog
 
 from PyQt6 import QtWidgets
 from selenium.webdriver.common.by import By
@@ -20,8 +20,8 @@ conectar = sqlite3.connect('banco.db')
 cursor = conectar.cursor()
 
 cursor.execute("CREATE TABLE if not exists UserData (listaCtts text, chat text, caminhoImg text, caminhoXlsx text)")
-cursor.execute("CREATE TABLE if not exists CaminhosHtml (chatEdit text, campoEscrever text, clipCaminho text, receberImg text, botaoEnviar text, cancelarPesq text, celula1 text, celula2 text, celula3 text)")
-cursor.execute("SELECT chatEdit, campoEscrever, clipCaminho, receberImg, botaoEnviar, cancelarPesq, celula1, celula2, celula3 FROM CaminhosHtml")
+cursor.execute("CREATE TABLE if not exists CaminhosHtml (chatEdit text, campoEscrever text, clipCaminho text, receberImg text, botaoEnviar text, cancelarPesq text, celula1 text, celula2 text, celula3 text, classGp text)")
+cursor.execute("SELECT chatEdit, campoEscrever, clipCaminho, receberImg, botaoEnviar, cancelarPesq, celula1, celula2, celula3, classGp FROM CaminhosHtml")
 resultado = cursor.fetchone()
 conectar.commit()
 cursor.close()
@@ -30,7 +30,36 @@ app = QApplication([])
 
 class zapbot:
     def UserDatadb(self):
-        bot.definirLista()
+        if self.checkboxXl.isChecked():
+            bot.definirLista()
+        if self.checkboxGp.isChecked():
+            bot.abrirZap()
+            time.sleep(15)
+            titles_list = []
+
+            # Encontrar a barra lateral uma vez
+            sidebar = self.driver.find_element(By.XPATH, "//div[@id='pane-side']")
+
+            # Execute JavaScript para rolar a barra lateral
+            while True:
+                # Rolar a barra lateral
+                self.driver.execute_script("arguments[0].scrollTop += 1000;", sidebar)
+                time.sleep(2)  # Espere um pouco após rolar para que a página carregue
+                
+                # Encontre todos os elementos com a classe "_ak8q" na página atual
+                titles = self.driver.find_elements(By.CSS_SELECTOR, f"{resultado[9]}")
+
+                # Extraia e imprima o texto desses elementos
+                for title in titles:
+                    titles_list.append(title.text)
+                
+                # Verifique se chegou ao final da lista rolando
+                end_of_list = self.driver.execute_script("return arguments[0].scrollHeight - arguments[0].scrollTop === arguments[0].clientHeight;", sidebar)
+                if end_of_list:
+                    break
+
+            lista_sem_repeticao = list(set(titles_list))
+            listaGps = json.dumps(lista_sem_repeticao)
         listaSerializada = json.dumps(self.listaCompleta)
         cursor = conectar.cursor()
         cursor.execute("DELETE FROM UserData")
@@ -38,10 +67,12 @@ class zapbot:
 
         cursor.execute("""INSERT INTO UserData VALUES (:listaCtts, :chat, :caminhoImg, :caminhoXlsx)""",
             {
-                'listaCtts':listaSerializada,
+                'listaCtts': (listaSerializada if (self.checkboxXl.isChecked() and not self.checkboxGp.isChecked())
+                             else (listaGps if (self.checkboxGp.isChecked() and not self.checkboxXl.isChecked())
+                                   else [listaSerializada, listaGps])),
                 'chat':self.msg.toPlainText(),
                 'caminhoImg':self.ImgCaminho.text(),
-                'caminhoXlsx':self.listaContatosEdit.text() if not self.checkbox.isChecked() else ""
+                'caminhoXlsx':self.listaContatosEdit.text(),# if self.checkboxXl.isChecked() else "",
             })
 
         cursor.execute("SELECT listaCtts FROM UserData")
@@ -59,7 +90,8 @@ class zapbot:
             self.listaCtts[i] = self.listaCtts[i].replace("?", "")
             self.listaCtts[i] = self.listaCtts[i].rstrip()
             self.listaCtts[i] = self.listaCtts[i].replace("  ", " ")
-        bot.abrirZap()
+        if not self.checkboxGp.isChecked():
+            bot.abrirZap()
         bot.disparar()
 
         '''    def Continuar(self):
@@ -72,20 +104,22 @@ class zapbot:
 
         cursor = conectar.cursor()
         cursor.execute("DELETE FROM CaminhosHtml")
-        cursor.execute("""INSERT INTO CaminhosHtml (chatEdit, campoEscrever, clipCaminho, receberImg, botaoEnviar, cancelarPesq, celula1, celula2, celula3)
-        VALUES (:chatEdit, :campoEscrever, :clipCaminho, :receberImg, :botaoEnviar, :cancelarPesq, :celula1, :celula2, :celula3)
-        """,
-                {
-            'chatEdit':tela2.chatEdit.text(),
-            'campoEscrever':tela2.campoEscrever.text(),
-            'clipCaminho':tela2.clipCaminho.text(),
-            'receberImg':tela2.receberImg.text(),
-            'botaoEnviar':tela2.botaoEnviar.text(),
-            'cancelarPesq':tela2.cancelarPesq.text(),
-            'celula1':tela2.celula1.text(),
-            'celula2':tela2.celula2.text(),
-            'celula3':tela2.celula3.text(),
+        cursor.execute("""
+            INSERT INTO CaminhosHtml (chatEdit, campoEscrever, clipCaminho, receberImg, botaoEnviar, cancelarPesq, celula1, celula2, celula3, classGp)
+            VALUES (:chatEdit, :campoEscrever, :clipCaminho, :receberImg, :botaoEnviar, :cancelarPesq, :celula1, :celula2, :celula3, :classGp)
+        """, {
+            'chatEdit': tela2.chatEdit.text(),
+            'campoEscrever': tela2.campoEscrever.text(),
+            'clipCaminho': tela2.clipCaminho.text(),
+            'receberImg': tela2.receberImg.text(),
+            'botaoEnviar': tela2.botaoEnviar.text(),
+            'cancelarPesq': tela2.cancelarPesq.text(),
+            'celula1': tela2.celula1.text(),
+            'celula2': tela2.celula2.text(),
+            'celula3': tela2.celula3.text(),
+            'classGp': tela2.classeCtt.text(),
         })
+
         conectar.commit()
         cursor.close()
 
@@ -105,43 +139,12 @@ class zapbot:
         time.sleep(10)
     def disparar(self):
         time.sleep(25)
-        if self.checkboxGp.isChecked():
-            titles_list = []
 
-            # Encontrar a barra lateral uma vez
-            sidebar = self.driver.find_element(By.XPATH, "//div[@id='pane-side']")
 
-            # Execute JavaScript para rolar a barra lateral
-            while True:
-                # Rolar a barra lateral
-                self.driver.execute_script("arguments[0].scrollTop += 1000;", sidebar)
-                time.sleep(2)  # Espere um pouco após rolar para que a página carregue
-                
-                # Encontre todos os elementos com a classe "_ak8q" na página atual
-                titles = self.driver.find_elements(By.CSS_SELECTOR, "._ak8q")
 
-                # Extraia e imprima o texto desses elementos
-                for title in titles:
-                    #print(title.text)
-                    titles_list.append(title.text)
-                
-                # Verifique se chegou ao final da lista rolando
-                end_of_list = self.driver.execute_script("return arguments[0].scrollHeight - arguments[0].scrollTop === arguments[0].clientHeight;", sidebar)
-                if end_of_list:
-
-                    break
-
-            lista_sem_repeticao = list(set(titles_list))
-            # Imprima os títulos encontrados
-            for title in titles_list:
-                print(title)
-
-            print("\n\n\n")
-            print(lista_sem_repeticao)
         erru=0
         while len(self.listaCtts) >= 1:
             try:
-    
                 WebDriverWait(self.driver, 30).until(EC.presence_of_element_located((By.XPATH, f'{resultado[0]}')))
                 time.sleep(1)
                 conv=self.driver.find_element(By.XPATH, f'{resultado[0]}')
@@ -157,23 +160,25 @@ class zapbot:
                 chat = self.driver.find_element(By.XPATH, f'{resultado[1]}')
                 time.sleep(1)
                 chat.click()
-                time.sleep(1.5)
-                ActionChains(self.driver).send_keys(self.msg.toPlainText() + Keys.RETURN).perform()
                 time.sleep(1)
+                ActionChains(self.driver).send_keys(self.msg.toPlainText()).perform()
+                time.sleep(5.5)
+                ActionChains(self.driver).send_keys(Keys.RETURN).perform()
                 #self.armazenado[4]+=1
                 #bot.Continuar()
-                WebDriverWait(self.driver, 30).until(EC.presence_of_element_located((By.XPATH, f'{resultado[2]}')))
-                clip = self.driver.find_element(By.XPATH, f"{resultado[2]}")
-                clip.click()
-                WebDriverWait(self.driver, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, f"{resultado[3]}")))
-                time.sleep(1)
-                attach = self.driver.find_element(By.CSS_SELECTOR, f"{resultado[3]}")
-                time.sleep(1)
-                attach.send_keys(self.ImgCaminho.text())
-                time.sleep(2)
-                WebDriverWait(self.driver, 30).until(EC.presence_of_element_located((By.XPATH, f'{resultado[4]}')))
-                send = self.driver.find_element(By.XPATH, f'{resultado[4]}')
-                send.click()
+                if self.ImgCaminho.text()!="":
+                    WebDriverWait(self.driver, 30).until(EC.presence_of_element_located((By.XPATH, f'{resultado[2]}')))
+                    clip = self.driver.find_element(By.XPATH, f"{resultado[2]}")
+                    clip.click()
+                    WebDriverWait(self.driver, 30).until(EC.presence_of_element_located((By.CSS_SELECTOR, f"{resultado[3]}")))
+                    time.sleep(1)
+                    attach = self.driver.find_element(By.CSS_SELECTOR, f"{resultado[3]}")
+                    time.sleep(1)
+                    attach.send_keys(self.ImgCaminho.text())
+                    time.sleep(2)
+                    WebDriverWait(self.driver, 30).until(EC.presence_of_element_located((By.XPATH, f'{resultado[4]}')))
+                    send = self.driver.find_element(By.XPATH, f'{resultado[4]}')
+                    send.click()
 
                 del self.listaCtts[0]
  
@@ -195,43 +200,45 @@ class zapbot:
 
     def tela1(self):
         self.window = QtWidgets.QWidget()
-        self.window.setGeometry(100, 100, 500, 625)
+        self.window.setGeometry(100, 100, 570, 500)
         self.window.setWindowTitle("Tela 1")
 
         cursor = conectar.cursor()
         cursor.execute("SELECT listaCtts, chat, caminhoImg, caminhoXlsx FROM UserData")
         self.armazenado = cursor.fetchone()
         cursor.close()
-        self.armazenado = list(self.armazenado)
+        #self.armazenado = list(self.armazenado)
 
         listaContatosLabel = QtWidgets.QLabel("Arquivo excel:", self.window)
         listaContatosLabel.setGeometry(20,20,200,20)
         self.listaContatosEdit = QtWidgets.QLineEdit("", self.window)
-        self.listaContatosEdit.setGeometry(20,40, 400,40)
+        self.listaContatosEdit.setGeometry(20, 40, 400, 40)
+        self.listaContatosButton = QtWidgets.QPushButton("Select File", self.window)
+        self.listaContatosButton.setGeometry(440, 40, 100, 40)
+        self.listaContatosButton.clicked.connect(lambda: self.open_file_dialog(self.listaContatosEdit, "Excel Files (*.xlsx)"))
 
-        buttonDefinir = QPushButton("Definir lista do excel", self.window)
-        buttonDefinir.setGeometry(150, 100, 120, 30)
-        buttonDefinir.clicked.connect(self.definirLista)
 
-        buttonClearCtt = QPushButton("Verificar", self.window)
+        buttonClearCtt = QPushButton("Definir lista do excel", self.window)
         buttonClearCtt.setGeometry(20, 100, 120, 30)
-        buttonClearCtt.clicked.connect(self.clearTextCtt)
+        buttonClearCtt.clicked.connect(self.definirLista)
 
         msgLabel = QtWidgets.QLabel("Mensagem desejada:", self.window)
-        msgLabel.setGeometry(20,230,200,20)
+        msgLabel.setGeometry(20,150,200,20)
         self.msg = QtWidgets.QTextEdit("", self.window)
-        self.msg.setGeometry(20,250,400,60)
+        self.msg.setGeometry(20,170,400,60)
+
         buttonClearMsg = QPushButton("Limpar Msg", self.window)
-        buttonClearMsg.setGeometry(20, 320, 120, 30)
+        buttonClearMsg.setGeometry(20, 240, 120, 30)
         buttonClearMsg.clicked.connect(self.clearTextMsg)
 
         caminhoImgLabel = QtWidgets.QLabel("Caminho de imagem:", self.window)
-        caminhoImgLabel.setGeometry(20,370,250,20)
-        self.ImgCaminho = QLineEdit("", self.window)
-        self.ImgCaminho.setGeometry(20,390,400,20)
-        buttonVerificar = QPushButton("Verificar Imagem", self.window)
-        buttonVerificar.setGeometry(20, 420, 120, 30)
-        buttonVerificar.clicked.connect(self.verificarImg)
+        caminhoImgLabel.setGeometry(20,290,250,20)
+        self.ImgCaminho = QtWidgets.QLineEdit("", self.window)
+        self.ImgCaminho.setGeometry(20, 310, 400, 20)
+        self.ImgCaminhoButton = QtWidgets.QPushButton("Select File", self.window)
+        self.ImgCaminhoButton.setGeometry(440, 310, 100, 20)
+        self.ImgCaminhoButton.clicked.connect(lambda: self.open_file_dialog(self.ImgCaminho, "Image Files (*.jpg *.jpeg *.png)"))
+
 
         if self.armazenado is not None:
             self.listaContatosEdit.setText(self.armazenado[3])
@@ -239,52 +246,33 @@ class zapbot:
             self.ImgCaminho.setText(self.armazenado[2])
 
         button = QPushButton("MODIFICAR", self.window)
-        button.setGeometry(20, 540, 120, 30)
+        button.setGeometry(20, 410, 120, 30)
         button.clicked.connect(self.abrirTela2)
 
        
 
-        self.checkbox = QCheckBox("Continuar de onde parou", self.window)
+        #self.checkbox = QCheckBox("Continuar de onde parou", self.window)
        
-        self.checkbox.setGeometry(20, 460, 300, 30)
+        #self.checkbox.setGeometry(20, 380, 300, 30)
      
         self.checkboxXl = QCheckBox("Usar caminho do Excel", self.window)
-        self.checkboxXl.setGeometry(20, 480, 300, 30)
+        self.checkboxXl.setGeometry(20, 350, 300, 30)
 
         self.checkboxGp = QCheckBox("Extrair contatos", self.window)
-        self.checkboxGp.setGeometry(20, 500, 300, 30)
+        self.checkboxGp.setGeometry(20, 370, 300, 30)
 
         buttonDisparar = QPushButton("DISPARAR", self.window)
-        buttonDisparar.setGeometry(150, 540, 120, 30)
+        buttonDisparar.setGeometry(150, 410, 120, 30)
         buttonDisparar.clicked.connect(self.UserDatadb)
 
+    def open_file_dialog(self, line_edit, file_filter):
+        file_path, _ = QFileDialog.getOpenFileName(self.window, "Select File", "", file_filter)
+        if file_path:
+            line_edit.setText(file_path)
+    
     def abrirTela2(self):
         tela2.show()
         self.window.close()
-
-    def verificarImg(self):
-        caminho = self.ImgCaminho.text()
-
-        if os.path.isfile(caminho):
-            mensagem = "A imagem existe no caminho fornecido."
-            cor = "green"
-        else:
-            mensagem = "A imagem não existe no caminho fornecido."
-            cor = "red"
-
-        QMessageBox.about(None, "Verificação de Imagem", f"<font color={cor}>{mensagem}</font>")
-
-    def clearTextCtt(self):
-        caminhoEx = self.listaContatosEdit.text()
-
-        if os.path.isfile(caminhoEx):
-            mensagem = "O arquivo existe no caminho fornecido."
-            cor = "green"
-        else:
-            mensagem = "O arquivo não existe no caminho fornecido."
-            cor = "red"
-
-        QMessageBox.about(None, "Verificação de Imagem", f"<font color={cor}>{mensagem}</font>")
 
     def merge_cells(self, row):
         
@@ -362,6 +350,11 @@ class Tela2(QMainWindow):
         self.celula3 = QLineEdit("", self)
         self.celula3.setGeometry(20,570,400,20)
 
+        classeCttLabel = QtWidgets.QLabel("Classe contato CSS:", self)
+        classeCttLabel.setGeometry(20,600,250,20)
+        self.classeCtt = QLineEdit("", self)
+        self.classeCtt.setGeometry(20,620,400,20)
+
         if resultado is not None:
             self.chatEdit.setText(resultado[0])
             self.campoEscrever.setText(resultado[1])
@@ -372,16 +365,16 @@ class Tela2(QMainWindow):
             self.celula1.setText(resultado[6])
             self.celula2.setText(resultado[7])
             self.celula3.setText(resultado[8])
-
+            self.classeCtt.setText(resultado[9])
 
 
 
         buttonDefinir = QPushButton("SALVAR", self)
-        buttonDefinir.setGeometry(150,600, 120, 30)
+        buttonDefinir.setGeometry(150,650, 120, 30)
         buttonDefinir.clicked.connect(bot.CaminhosHtmldb)
 
         buttonVoltar = QPushButton("Voltar", self)
-        buttonVoltar.setGeometry(20,600, 120, 30)
+        buttonVoltar.setGeometry(20,650, 120, 30)
         buttonVoltar.clicked.connect(self.voltarParaTela1)
 
 
