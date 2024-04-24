@@ -51,7 +51,7 @@ class zapbot:
             titles_list = []
 
             # Encontrar a barra lateral uma vez
-            sidebar = self.driver.find_element(By.XPATH, "//div[@id='pane-side']")
+            sidebar = self.driver.find_element(By.XPATH, f"{resultado[10]}")
 
             # Execute JavaScript para rolar a barra lateral
             while True:
@@ -136,7 +136,7 @@ class zapbot:
             'celula2': tela2.celula2.text(),
             'celula3': tela2.celula3.text(),
             'classGp': tela2.classeCtt.text(),
-            'barraLateral': self.lateral.text(), # Substitua isso pelo valor real da barra lateral
+            'barraLateral': tela2.lateral.text(), # Substitua isso pelo valor real da barra lateral
         })
         conectar.commit()
         cursor.close()
@@ -317,66 +317,66 @@ class Tela2(QMainWindow):
         super().__init__()
 
         self.setWindowTitle("Segunda Tela")
-        self.setGeometry(200, 200, 650, 650)
+        self.setGeometry(200, 100, 650, 650)  # Movido para cima por 100 pixels
 
         cursor = conectar.cursor()
 
         cursor.close()
 
         chatLabel = QtWidgets.QLabel("CHAT LIST CSS:", self)
-        chatLabel.setGeometry(20,130,200,20)
+        chatLabel.setGeometry(20, 30, 200, 20)  # Movido para cima por 100 pixels
         self.chatEdit = QLineEdit("", self)
-        self.chatEdit.setGeometry(20,150, 400,20)
+        self.chatEdit.setGeometry(20, 50, 400, 20)  # Movido para cima por 100 pixels
 
         escreverLabel = QtWidgets.QLabel("CAMPO ESCREVER CSS:", self)
-        escreverLabel.setGeometry(20,180,200,20)
+        escreverLabel.setGeometry(20, 80, 200, 20)  # Movido para cima por 100 pixels
         self.campoEscrever = QLineEdit("", self)
-        self.campoEscrever.setGeometry(20,200,400,20)
+        self.campoEscrever.setGeometry(20, 100, 400, 20)  # Movido para cima por 100 pixels
 
         clipLabel = QtWidgets.QLabel("CLIP ENVIAR CSS:", self)
-        clipLabel.setGeometry(20,230,250,20)
+        clipLabel.setGeometry(20, 130, 250, 20)  # Movido para cima por 100 pixels
         self.clipCaminho = QLineEdit("", self)
-        self.clipCaminho.setGeometry(20,250,400,20)
+        self.clipCaminho.setGeometry(20, 150, 400, 20)  # Movido para cima por 100 pixels
 
         receberLabel = QtWidgets.QLabel("INPUT FILE CSS:", self)
-        receberLabel.setGeometry(20,280,250,20)
+        receberLabel.setGeometry(20, 180, 250, 20)  # Movido para cima por 100 pixels
         self.receberImg = QLineEdit("", self)
-        self.receberImg.setGeometry(20,300,400,20)
+        self.receberImg.setGeometry(20, 200, 400, 20)  # Movido para cima por 100 pixels
 
         botaoEnviarLabel = QtWidgets.QLabel("BOTÃO ENVIAR XPATH:", self)
-        botaoEnviarLabel.setGeometry(20,330,250,20)
+        botaoEnviarLabel.setGeometry(20, 230, 250, 20)  # Movido para cima por 100 pixels
         self.botaoEnviar = QLineEdit("", self)
-        self.botaoEnviar.setGeometry(20,350,400,20)
+        self.botaoEnviar.setGeometry(20, 250, 400, 20)  # Movido para cima por 100 pixels
 
         cancelarLabel = QtWidgets.QLabel("CANCELAR PESQUISA XPATH:", self)
-        cancelarLabel.setGeometry(20,380,250,20)
+        cancelarLabel.setGeometry(20, 280, 250, 20)  # Movido para cima por 100 pixels
         self.cancelarPesq = QLineEdit("", self)
-        self.cancelarPesq.setGeometry(20,400,400,20)
+        self.cancelarPesq.setGeometry(20, 300, 400, 20)  # Movido para cima por 100 pixels
 
         celula1Label = QtWidgets.QLabel("Célula 1:", self)
-        celula1Label.setGeometry(20,450,250,20)
+        celula1Label.setGeometry(20, 350, 250, 20)  # Movido para cima por 100 pixels
         self.celula1 = QLineEdit("", self)
-        self.celula1.setGeometry(20,470,400,20)
+        self.celula1.setGeometry(20, 370, 400, 20)  # Movido para cima por 100 pixels
 
         celula2Label = QtWidgets.QLabel("Célula 2:", self)
-        celula2Label.setGeometry(20,500,250,20)
+        celula2Label.setGeometry(20, 400, 250, 20)  # Movido para cima por 100 pixels
         self.celula2 = QLineEdit("", self)
-        self.celula2.setGeometry(20,520,400,20)
+        self.celula2.setGeometry(20, 420, 400, 20)  # Movido para cima por 100 pixels
 
         celula3Label = QtWidgets.QLabel("Célula 3:", self)
-        celula3Label.setGeometry(20,550,250,20)
+        celula3Label.setGeometry(20, 450, 250, 20)  # Movido para cima por 100 pixels
         self.celula3 = QLineEdit("", self)
-        self.celula3.setGeometry(20,570,400,20)
+        self.celula3.setGeometry(20, 470, 400, 20)  # Movido para cima por 100 pixels
 
         classeCttLabel = QtWidgets.QLabel("Classe contato CSS:", self)
-        classeCttLabel.setGeometry(20,600,250,20)
+        classeCttLabel.setGeometry(20, 500, 250, 20)  # Movido para cima por 100 pixels
         self.classeCtt = QLineEdit("", self)
-        self.classeCtt.setGeometry(20,620,400,20)
+        self.classeCtt.setGeometry(20, 520, 400, 20)  # Movido para cima por 100 pixels
 
         classeLateral = QtWidgets.QLabel("Barra lateral XPATH:", self)
-        classeLateral.setGeometry(20,650,250,20)
+        classeLateral.setGeometry(20, 550, 250, 20)  # Movido para cima por 100 pixels
         self.lateral = QLineEdit("", self)
-        self.lateral.setGeometry(20,670,400,20)
+        self.lateral.setGeometry(20, 570, 400, 20)
 
         if resultado is not None:
             self.chatEdit.setText(resultado[0])
@@ -389,15 +389,15 @@ class Tela2(QMainWindow):
             self.celula2.setText(resultado[7])
             self.celula3.setText(resultado[8])
             self.classeCtt.setText(resultado[9])
-
+            self.lateral.setText(resultado[10])
 
 
         buttonDefinir = QPushButton("SALVAR", self)
-        buttonDefinir.setGeometry(150,650, 120, 30)
+        buttonDefinir.setGeometry(150,600, 120, 30)
         buttonDefinir.clicked.connect(bot.CaminhosHtmldb)
 
         buttonVoltar = QPushButton("Voltar", self)
-        buttonVoltar.setGeometry(20,650, 120, 30)
+        buttonVoltar.setGeometry(20,600, 120, 30)
         buttonVoltar.clicked.connect(self.voltarParaTela1)
 
 
