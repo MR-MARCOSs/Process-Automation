@@ -18,10 +18,23 @@ hoje = datetime.datetime.now()
 dataFormatada = hoje.strftime('%d_%m_%Y')
 conectar = sqlite3.connect('banco.db')
 cursor = conectar.cursor()
-
 cursor.execute("CREATE TABLE if not exists UserData (listaCtts text, chat text, caminhoImg text, caminhoXlsx text)")
-cursor.execute("CREATE TABLE if not exists CaminhosHtml (chatEdit text, campoEscrever text, clipCaminho text, receberImg text, botaoEnviar text, cancelarPesq text, celula1 text, celula2 text, celula3 text, classGp text)")
-cursor.execute("SELECT chatEdit, campoEscrever, clipCaminho, receberImg, botaoEnviar, cancelarPesq, celula1, celula2, celula3, classGp FROM CaminhosHtml")
+cursor.execute("""
+    CREATE TABLE IF NOT EXISTS CaminhosHtml (
+        chatEdit TEXT,
+        campoEscrever TEXT,
+        clipCaminho TEXT,
+        receberImg TEXT,
+        botaoEnviar TEXT,
+        cancelarPesq TEXT,
+        celula1 TEXT,
+        celula2 TEXT,
+        celula3 TEXT,
+        classGp TEXT,
+        barraLateral TEXT
+    )
+""")
+cursor.execute("SELECT chatEdit, campoEscrever, clipCaminho, receberImg, botaoEnviar, cancelarPesq, celula1, celula2, celula3, classGp, barraLateral FROM CaminhosHtml")
 resultado = cursor.fetchone()
 conectar.commit()
 cursor.close()
@@ -105,8 +118,13 @@ class zapbot:
         cursor = conectar.cursor()
         cursor.execute("DELETE FROM CaminhosHtml")
         cursor.execute("""
-            INSERT INTO CaminhosHtml (chatEdit, campoEscrever, clipCaminho, receberImg, botaoEnviar, cancelarPesq, celula1, celula2, celula3, classGp)
-            VALUES (:chatEdit, :campoEscrever, :clipCaminho, :receberImg, :botaoEnviar, :cancelarPesq, :celula1, :celula2, :celula3, :classGp)
+            INSERT INTO CaminhosHtml (
+                chatEdit, campoEscrever, clipCaminho, receberImg, botaoEnviar,
+                cancelarPesq, celula1, celula2, celula3, classGp, barraLateral
+            ) VALUES (
+                :chatEdit, :campoEscrever, :clipCaminho, :receberImg, :botaoEnviar,
+                :cancelarPesq, :celula1, :celula2, :celula3, :classGp, :barraLateral
+            )
         """, {
             'chatEdit': tela2.chatEdit.text(),
             'campoEscrever': tela2.campoEscrever.text(),
@@ -118,8 +136,8 @@ class zapbot:
             'celula2': tela2.celula2.text(),
             'celula3': tela2.celula3.text(),
             'classGp': tela2.classeCtt.text(),
+            'barraLateral': self.lateral.text(), # Substitua isso pelo valor real da barra lateral
         })
-
         conectar.commit()
         cursor.close()
 
@@ -354,6 +372,11 @@ class Tela2(QMainWindow):
         classeCttLabel.setGeometry(20,600,250,20)
         self.classeCtt = QLineEdit("", self)
         self.classeCtt.setGeometry(20,620,400,20)
+
+        classeLateral = QtWidgets.QLabel("Barra lateral XPATH:", self)
+        classeLateral.setGeometry(20,650,250,20)
+        self.lateral = QLineEdit("", self)
+        self.lateral.setGeometry(20,670,400,20)
 
         if resultado is not None:
             self.chatEdit.setText(resultado[0])
