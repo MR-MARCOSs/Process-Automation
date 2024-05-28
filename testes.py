@@ -105,7 +105,7 @@ class zapbot:
             self.listaCtts[i] = self.listaCtts[i].replace("  ", " ")
         if not self.checkboxGp.isChecked():
             bot.abrirZap()
-
+        print("teste")
         bot.disparar()
 
         '''    def Continuar(self):
@@ -158,17 +158,18 @@ class zapbot:
         time.sleep(10)
     def disparar(self):
         time.sleep(25)
+
         erru=0
         while len(self.listaCtts) >= 1:
-            try:
+           
                 WebDriverWait(self.driver, 15).until(EC.presence_of_element_located((By.XPATH, f'{resultado[0]}')))
                 time.sleep(1)
                 conv=self.driver.find_element(By.XPATH, f'{resultado[0]}')
+                print("teste2")
                 conv.click()
                 time.sleep(1)
                 ActionChains(self.driver).send_keys(self.listaCtts[0]).perform()
                 time.sleep(1)
-                WebDriverWait(self.driver, 15).until(EC.visibility_of_element_located((By.XPATH, f'//span[@title="{self.listaCtts[0]}"]')))
                 contato = self.driver.find_element(By.XPATH, f'//span[@title="{self.listaCtts[0]}"]')
                 time.sleep(1)
                 contato.click()
@@ -189,16 +190,18 @@ class zapbot:
                     WebDriverWait(self.driver, 15).until(EC.presence_of_element_located((By.CSS_SELECTOR, f"{resultado[3]}")))
                     time.sleep(1)
                     attach = self.driver.find_element(By.CSS_SELECTOR, f'{resultado[3]}')
+                    print("HTML do elemento attach:", attach.get_attribute('outerHTML'))
                     self.driver.execute_script("arguments[0].style.display = 'block';", attach)
                     time.sleep(1)
                     attach.send_keys(f'{self.ImgCaminho.text()}')
+                    print("teste3")
                     time.sleep(1.5)
                     WebDriverWait(self.driver, 15).until(EC.presence_of_element_located((By.XPATH, f'{resultado[4]}')))
                     send = self.driver.find_element(By.XPATH, f'{resultado[4]}')
                     send.click()
 
                 del self.listaCtts[0]
- 
+        '''
             except:               
                 try:
                     with open(self.nomeArquivo, 'a', encoding='utf-8') as arquivo:
@@ -214,7 +217,7 @@ class zapbot:
                     del self.listaCtts[0]
         with open(self.nomeArquivo, 'a') as arquivo:
             arquivo.write(f'Total de erros: {erru}')
-
+'''
     def tela1(self):
         self.window = QtWidgets.QWidget()
         self.window.setGeometry(100, 100, 570, 500)
@@ -279,11 +282,9 @@ class zapbot:
         buttonDisparar.clicked.connect(self.UserDatadb)
 
     def open_file_dialog(self, line_edit, file_filter):
-        file_path, _ = QtWidgets.QFileDialog.getOpenFileName(self.window, "Select File", "", file_filter)
+        file_path, _ = QFileDialog.getOpenFileName(self.window, "Select File", "", file_filter)
         if file_path:
-            normalized_path = os.path.normpath(file_path)
-            line_edit.setText(normalized_path)
-
+            line_edit.setText(file_path)
     
     def abrirTela2(self):
         tela2.show()

@@ -1,2 +1,9 @@
-model/
+# Ignorar drivers do navegador
 geckodriver
+chromedriver
+
+# Ignorar o arquivo de banco de dados
+banco.db
+
+# Ignorar a pasta .vscode
+.vscode/
