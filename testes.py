@@ -157,7 +157,8 @@ class zapbot:
         self.driver.get('https://web.whatsapp.com/')
         time.sleep(10)
     def disparar(self):
-        time.sleep(25)
+        WebDriverWait(self.driver, 500).until(EC.presence_of_element_located((By.XPATH, f'{resultado[0]}')))
+        time.sleep(10)
 
         erru=0
         while len(self.listaCtts) >= 1:
@@ -165,11 +166,17 @@ class zapbot:
                 WebDriverWait(self.driver, 15).until(EC.presence_of_element_located((By.XPATH, f'{resultado[0]}')))
                 time.sleep(1)
                 conv=self.driver.find_element(By.XPATH, f'{resultado[0]}')
-                print("teste2")
+                span_element = conv.find_elements(By.XPATH, ".//span[contains(@class, 'selectable-text')]")
+                if span_element:
+                    print('A caixa de texto não está vazia.')
+                    WebDriverWait(self.driver, 15).until(EC.presence_of_element_located((By.XPATH, f'{resultado[5]}')))
+                    apaga=self.driver.find_element(By.XPATH, f'{resultado[5]}')
+                    apaga.click()            
                 conv.click()
                 time.sleep(1)
                 ActionChains(self.driver).send_keys(self.listaCtts[0]).perform()
                 time.sleep(1)
+                WebDriverWait(self.driver, 15).until(EC.visibility_of_element_located((By.XPATH, f'//span[@title="{self.listaCtts[0]}"]')))
                 contato = self.driver.find_element(By.XPATH, f'//span[@title="{self.listaCtts[0]}"]')
                 time.sleep(1)
                 contato.click()
@@ -181,8 +188,6 @@ class zapbot:
                 ActionChains(self.driver).send_keys(self.msg.toPlainText()).perform()
                 time.sleep(1)
                 ActionChains(self.driver).send_keys(Keys.RETURN).perform()
-                #self.armazenado[4]+=1
-                #bot.Continuar()
                 if self.ImgCaminho.text()!="":
                     WebDriverWait(self.driver, 15).until(EC.presence_of_element_located((By.XPATH, f"{resultado[2]}")))
                     clip = self.driver.find_element(By.XPATH, f"{resultado[2]}")
@@ -190,16 +195,14 @@ class zapbot:
                     WebDriverWait(self.driver, 15).until(EC.presence_of_element_located((By.CSS_SELECTOR, f"{resultado[3]}")))
                     time.sleep(1)
                     attach = self.driver.find_element(By.CSS_SELECTOR, f'{resultado[3]}')
-                    print("HTML do elemento attach:", attach.get_attribute('outerHTML'))
-                    self.driver.execute_script("arguments[0].style.display = 'block';", attach)
+                    #self.driver.execute_script("arguments[0].style.display = 'block';", attach)
                     time.sleep(1)
                     attach.send_keys(f'{self.ImgCaminho.text()}')
-                    print("teste3")
                     time.sleep(1.5)
                     WebDriverWait(self.driver, 15).until(EC.presence_of_element_located((By.XPATH, f'{resultado[4]}')))
                     send = self.driver.find_element(By.XPATH, f'{resultado[4]}')
                     send.click()
-
+                    time.sleep(1)
                 del self.listaCtts[0]
         '''
             except:               
