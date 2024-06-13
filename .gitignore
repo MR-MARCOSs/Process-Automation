@@ -1,0 +1,9 @@
+# Ignorar drivers do navegador
+geckodriver.exe
+chromedriver
+
+# Ignorar o arquivo de banco de dados
+banco.db
+
+# Ignorar a pasta .vscode
+.vscode/
