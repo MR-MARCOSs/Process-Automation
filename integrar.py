@@ -157,57 +157,67 @@ class zapbot:
         self.driver.get('https://web.whatsapp.com/')
         time.sleep(10)
     def disparar(self):
-        WebDriverWait(self.driver, 500).until(EC.presence_of_element_located((By.XPATH, f'{resultado[0]}')))
-        time.sleep(10)
+        time.sleep(25)
         erru=0
         while len(self.listaCtts) >= 1:
             try:
-                WebDriverWait(self.driver, 15).until(EC.presence_of_element_located((By.XPATH, f'{resultado[0]}')))
+                WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, f'{resultado[0]}')))
                 time.sleep(1)
                 conv=self.driver.find_element(By.XPATH, f'{resultado[0]}')
+<<<<<<< HEAD:WavesApp.py
                 span_element = conv.find_elements(By.XPATH, ".//span[contains(@class, 'selectable-text')]")
                 if span_element:
-                    WebDriverWait(self.driver, 15).until(EC.presence_of_element_located((By.XPATH, f'{resultado[5]}')))
+                    WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, f'{resultado[5]}')))
                     apaga=self.driver.find_element(By.XPATH, f'{resultado[5]}')
                     apaga.click()
+=======
+>>>>>>> parent of f21b1ad (search box not empty error fixed):integrar.py
                 conv.click()
                 time.sleep(1)
+                ActionChains(self.driver).click(conv).perform()
                 ActionChains(self.driver).send_keys(self.listaCtts[0]).perform()
                 time.sleep(1)
-                WebDriverWait(self.driver, 15).until(EC.visibility_of_element_located((By.XPATH, f'//span[@title="{self.listaCtts[0]}"]')))
+                WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located((By.XPATH, f'//span[@title="{self.listaCtts[0]}"]')))
                 contato = self.driver.find_element(By.XPATH, f'//span[@title="{self.listaCtts[0]}"]')
                 time.sleep(1)
                 contato.click()
                 time.sleep(1)
-                WebDriverWait(self.driver, 15).until(EC.visibility_of_element_located((By.XPATH, f'{resultado[1]}')))
+                WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located((By.XPATH, f'{resultado[1]}')))
                 chat = self.driver.find_element(By.XPATH, f'{resultado[1]}')
                 chat.click()
                 time.sleep(1)
                 ActionChains(self.driver).send_keys(self.msg.toPlainText()).perform()
                 time.sleep(1)
                 ActionChains(self.driver).send_keys(Keys.RETURN).perform()
+                #self.armazenado[4]+=1
+                #bot.Continuar()
                 if self.ImgCaminho.text()!="":
-                    WebDriverWait(self.driver, 15).until(EC.presence_of_element_located((By.XPATH, f"{resultado[2]}")))
+                    WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, f"{resultado[2]}")))
                     clip = self.driver.find_element(By.XPATH, f"{resultado[2]}")
                     clip.click()
-                    WebDriverWait(self.driver, 15).until(EC.presence_of_element_located((By.CSS_SELECTOR, f"{resultado[3]}")))
+                    WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, f"{resultado[3]}")))
                     time.sleep(1)
                     attach = self.driver.find_element(By.CSS_SELECTOR, f'{resultado[3]}')
-                    #self.driver.execute_script("arguments[0].style.display = 'block';", attach)
+                    self.driver.execute_script("arguments[0].style.display = 'block';", attach)
                     time.sleep(1)
                     attach.send_keys(f'{self.ImgCaminho.text()}')
                     time.sleep(1.5)
-                    WebDriverWait(self.driver, 15).until(EC.presence_of_element_located((By.XPATH, f'{resultado[4]}')))
+                    WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, f'{resultado[4]}')))
                     send = self.driver.find_element(By.XPATH, f'{resultado[4]}')
                     send.click()
-                del self.listaCtts[0]
 
+                del self.listaCtts[0]
+ 
             except:               
                 try:
                     with open(self.nomeArquivo, 'a', encoding='utf-8') as arquivo:
                         arquivo.write(f'{self.listaCtts[0]}\n')
                     time.sleep(1)
-                    WebDriverWait(self.driver, 15).until(EC.presence_of_element_located((By.XPATH, f'{resultado[5]}')))
+<<<<<<< HEAD:WavesApp.py
+                    WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, f'{resultado[5]}')))
+=======
+                    WebDriverWait(self.driver, 30).until(EC.presence_of_element_located((By.XPATH, f'{resultado[5]}')))
+>>>>>>> parent of f21b1ad (search box not empty error fixed):integrar.py
                     apaga=self.driver.find_element(By.XPATH, f'{resultado[5]}')
                     apaga.click()
                     erru=erru+1
@@ -217,6 +227,7 @@ class zapbot:
                     del self.listaCtts[0]
         with open(self.nomeArquivo, 'a') as arquivo:
             arquivo.write(f'Total de erros: {erru}')
+        self.driver.quit()
 
     def tela1(self):
         self.window = QtWidgets.QWidget()

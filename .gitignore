@@ -1,5 +1,5 @@
 # Ignorar drivers do navegador
-geckodriver.exe
+geckodriver
 chromedriver
 
 # Ignorar o arquivo de banco de dados
