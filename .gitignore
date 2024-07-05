@@ -1,7 +1,7 @@
 # Ignorar drivers do navegador
 geckodriver.exe
 chromedriver
-
+banco2.db
 # Ignorar o arquivo de banco de dados
 banco.db
 
