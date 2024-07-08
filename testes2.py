@@ -188,12 +188,18 @@ class zapbot:
             EC.element_to_be_clickable((By.XPATH, f"//span[@title='{self.cttNomeEdit.text()}']"))
         )
         contact.click()
+        
         while len(self.listaCtts) > 0:
             try:
                 contact = WebDriverWait(self.driver, 30).until(
                 EC.presence_of_element_located((By.XPATH, f"//span[@title='{self.cttNomeEdit.text()}']"))
                 )
-                contact.click()
+                for _ in range(3):
+                    try:
+                        contact.click()
+                        break
+                    except:
+                        time.sleep(1)
                 new_message = WebDriverWait(self.driver, 1200).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, f"{resultado[0]}"))
                 )
@@ -285,21 +291,7 @@ class zapbot:
             arquivo.write(f'Total de erros: {erru}')
         time.sleep(300)
         self.driver.quit()
-        '''except:               
-                try:
-                    with open(self.nomeArquivo, 'a', encoding='utf-8') as arquivo:
-                        arquivo.write(f'{self.listaCtts[0]}\n')
-                    time.sleep(1)
-                    WebDriverWait(self.driver, 15).until(EC.presence_of_element_located((By.XPATH, f'{resultado[5]}')))
-                    apaga=self.driver.find_element(By.XPATH, f'{resultado[5]}')
-                    apaga.click()
-                    erru=erru+1
-                    del self.listaCtts[0]
-                except:
-                    erru=erru+1
-                    del self.listaCtts[0]
-        with open(self.nomeArquivo, 'a') as arquivo:
-            arquivo.write(f'Total de erros: {erru}')'''
+
 
     def tela1(self):
         self.window = QtWidgets.QWidget()

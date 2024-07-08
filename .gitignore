@@ -4,6 +4,7 @@ chromedriver
 banco2.db
 # Ignorar o arquivo de banco de dados
 banco.db
-
+dist/
 # Ignorar a pasta .vscode
 .vscode/
+build/
