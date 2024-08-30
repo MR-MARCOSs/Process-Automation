@@ -200,6 +200,7 @@ class zapbot:
                         break
                     except:
                         time.sleep(1)
+                contact.click()
                 new_message = WebDriverWait(self.driver, 1200).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, f"{resultado[0]}"))
                 )
@@ -225,7 +226,7 @@ class zapbot:
                 )
                 time.sleep(1)
                 forward_option.click()
-                time.sleep(1)
+                time.sleep(0.5)
                 checkboxes = WebDriverWait(self.driver, 10).until(
                     EC.presence_of_all_elements_located((By.CSS_SELECTOR, f"{resultado[3]}"))
                 )
@@ -235,19 +236,18 @@ class zapbot:
                         self.driver.execute_script("arguments[0].scrollIntoView();", checkbox)
                         time.sleep(1)
                         self.driver.execute_script("arguments[0].click();", checkbox)
-                
+                contact.click()
+                time.sleep(0.5)
                 to_foward = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, f"{resultado[4]}")))
                 to_foward.click()
-
-                search_box = WebDriverWait(self.driver, 10).until(
-                    EC.element_to_be_clickable((By.XPATH, f"{resultado[5]}"))
-                )
+                #search_box = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.XPATH, f"{resultado[5]}")))
                 list_range = min(5, len(self.listaCtts))
                 x=0
                 while x < list_range:
                     try:
-                        search_box.click()
+                        #search_box.click()
                         time.sleep(1)
+                        
                         ActionChains(self.driver).send_keys(self.listaCtts[0]).perform()
                         time.sleep(1)
                         contact_send = WebDriverWait(self.driver, 10).until(
@@ -322,6 +322,10 @@ class zapbot:
         self.cadastrarUsuarioButton = QPushButton("Cadastrar Usuário", self.window)
         self.cadastrarUsuarioButton.setGeometry(440, 110, 100, 40)
         self.cadastrarUsuarioButton.clicked.connect(self.cadastrarUsuario)
+
+        excluirUsuarioButton = QPushButton("Excluir Usuário", self.window)
+        excluirUsuarioButton.setGeometry(440, 40, 100, 40)
+        excluirUsuarioButton.clicked.connect(self.excluirUsuario)
         
         listaContatosLabel = QtWidgets.QLabel("Arquivo excel:", self.window)
         listaContatosLabel.setGeometry(20, 160, 200, 20)
@@ -359,6 +363,30 @@ class zapbot:
             self.cttNomeEdit.setText(self.armazenado[1])
 
         self.window.show()
+
+    def excluirUsuario(self):
+        usuario_selecionado = self.usuariosComboBox.currentText()
+        
+        if usuario_selecionado:
+            # Confirmar a exclusão
+            resposta = QtWidgets.QMessageBox.question(
+                self.window, 'Confirmar Exclusão', f"Você realmente deseja excluir o usuário '{usuario_selecionado}'?",
+                QtWidgets.QMessageBox.StandardButton.Yes | QtWidgets.QMessageBox.StandardButton.No, QtWidgets.QMessageBox.StandardButton.No
+            )
+
+            if resposta == QtWidgets.QMessageBox.StandardButton.Yes:
+                cursor = conectar.cursor()
+                cursor.execute('DELETE FROM UserData WHERE user = ?', (usuario_selecionado,))
+                conectar.commit()
+                cursor.close()
+
+                # Atualizar a lista de usuários
+                self.usuariosComboBox.removeItem(self.usuariosComboBox.currentIndex())
+
+                # Limpar os campos de dados do usuário
+                self.cttNomeEdit.clear()
+                self.listaContatosEdit.clear()
+
     def atualizarDadosUsuario(self):
         usuario_selecionado = self.usuariosComboBox.currentText()
 
@@ -415,14 +443,13 @@ class Tela2(QMainWindow):
     def __init__(self, tela1):
         bot.tela1()
         super().__init__()
-
         self.setWindowTitle("Segunda Tela")
-        self.setGeometry(200, 100, 650, 800)
+        self.setGeometry(200, 100, 750, 500)
 
         cursor = conectar.cursor()
-
         cursor.close()
 
+        # Coluna 1
         newMessageLabel = QtWidgets.QLabel("(CSS) New Message:", self)
         newMessageLabel.setGeometry(20, 30, 200, 20)
         self.newMessageEdit = QLineEdit("", self)
@@ -458,36 +485,37 @@ class Tela2(QMainWindow):
         self.cancelSearchEdit = QLineEdit("", self)
         self.cancelSearchEdit.setGeometry(20, 350, 400, 20)
 
+        # Coluna 2
         sendButtonLabel = QtWidgets.QLabel("(XPATH) Send Button:", self)
-        sendButtonLabel.setGeometry(20, 380, 200, 20)
+        sendButtonLabel.setGeometry(350, 30, 200, 20)
         self.sendButtonEdit = QLineEdit("", self)
-        self.sendButtonEdit.setGeometry(20, 400, 400, 20)
+        self.sendButtonEdit.setGeometry(350, 50, 400, 20)
 
         celula1Label = QtWidgets.QLabel("Célula 1:", self)
-        celula1Label.setGeometry(20, 430, 200, 20)
+        celula1Label.setGeometry(350, 80, 200, 20)
         self.celula1 = QLineEdit("", self)
-        self.celula1.setGeometry(20, 450, 400, 20)
+        self.celula1.setGeometry(350, 100, 400, 20)
 
         celula2Label = QtWidgets.QLabel("Célula 2:", self)
-        celula2Label.setGeometry(20, 480, 200, 20)
+        celula2Label.setGeometry(350, 130, 200, 20)
         self.celula2 = QLineEdit("", self)
-        self.celula2.setGeometry(20, 500, 400, 20)
+        self.celula2.setGeometry(350, 150, 400, 20)
 
         celula3Label = QtWidgets.QLabel("Célula 3:", self)
-        celula3Label.setGeometry(20, 530, 200, 20)
+        celula3Label.setGeometry(350, 180, 200, 20)
         self.celula3 = QLineEdit("", self)
-        self.celula3.setGeometry(20, 550, 400, 20)
+        self.celula3.setGeometry(350, 200, 400, 20)
 
         classGpLabel = QtWidgets.QLabel("(CSS) Classe GP:", self)
-        classGpLabel.setGeometry(20, 580, 200, 20)
+        classGpLabel.setGeometry(350, 230, 200, 20)
         self.classGpEdit = QLineEdit("", self)
-        self.classGpEdit.setGeometry(20, 600, 400, 20)
+        self.classGpEdit.setGeometry(350, 250, 400, 20)
 
         sideBarLabel = QtWidgets.QLabel("(XPATH) Side Bar:", self)
-        sideBarLabel.setGeometry(20, 630, 200, 20)
+        sideBarLabel.setGeometry(350, 280, 200, 20)
         self.sideBarEdit = QLineEdit("", self)
-        self.sideBarEdit.setGeometry(20, 650, 400, 20)
-
+        self.sideBarEdit.setGeometry(350, 300, 400, 20)
+        
         if resultado is not None:
             self.newMessageEdit.setText(resultado[0])
             self.drawerArrowEdit.setText(resultado[1])
@@ -504,11 +532,11 @@ class Tela2(QMainWindow):
             self.sideBarEdit.setText(resultado[12])
 
         buttonDefinir = QPushButton("SALVAR", self)
-        buttonDefinir.setGeometry(150, 700, 120, 30)
+        buttonDefinir.setGeometry(150, 400, 120, 30)
         buttonDefinir.clicked.connect(bot.CaminhosHtmldb)
 
         buttonVoltar = QPushButton("Voltar", self)
-        buttonVoltar.setGeometry(20, 700, 120, 30)
+        buttonVoltar.setGeometry(20, 400, 120, 30)
         buttonVoltar.clicked.connect(self.voltarParaTela1)
 
 
